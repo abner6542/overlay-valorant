@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Overlay Valorant</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Fundo TRANSPARENTE — use como fonte "Link"/"Navegador" em 1920x1080 */
+  :root { --red:#ff4655; --navy:#0f1923; --ice:#ece8e1; --mint:#3de2b4; }
+  html,body{margin:0;width:1920px;height:1080px;background:transparent;overflow:hidden;
+    font-family:'Rajdhani',sans-serif;color:var(--ice)}
+
+  /* ---------- barra superior ---------- */
+  .top{position:absolute;top:28px;left:28px;display:flex;align-items:stretch;height:64px;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
+  .live{background:var(--red);display:flex;align-items:center;gap:10px;padding:0 22px 0 18px;
+    clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%);font:700 26px 'Rajdhani';letter-spacing:3px}
+  .dot{width:12px;height:12px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}
+  @keyframes pulse{50%{opacity:.25}}
+  .name{background:var(--navy);display:flex;align-items:center;padding:0 34px 0 30px;margin-left:-8px;
+    clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);font:400 34px 'Anton';letter-spacing:1.5px}
+  .name b{color:var(--red);font-weight:400;margin-right:6px}
+  .clock{background:rgba(15,25,35,.82);display:flex;align-items:center;padding:0 26px;margin-left:-8px;
+    clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);font:700 24px 'Rajdhani';letter-spacing:2px}
+  .clock span{color:var(--mint);margin-left:10px}
+
+  /* ---------- moldura da webcam (canto inferior direito) ---------- */
+  .cam{position:absolute;right:28px;bottom:118px;width:420px;height:236px}
+  .cam .frame{position:absolute;inset:0;border:3px solid var(--red);
+    clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,26px 100%,0 calc(100% - 26px))}
+  .cam .corner{position:absolute;width:38px;height:38px;border:5px solid var(--ice)}
+  .cam .c1{top:-10px;left:-10px;border-right:0;border-bottom:0}
+  .cam .c2{bottom:-10px;right:-10px;border-left:0;border-top:0}
+  .cam .tag{position:absolute;left:-3px;bottom:-40px;background:var(--red);padding:4px 16px;
+    font:700 20px 'Rajdhani';letter-spacing:3px;clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+
+  /* ---------- rodapé com mensagens rotativas ---------- */
+  .bar{position:absolute;left:28px;bottom:28px;height:56px;display:flex;align-items:stretch;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
+  .bar .label{background:var(--ice);color:var(--navy);display:flex;align-items:center;padding:0 22px;
+    font:400 26px 'Anton';letter-spacing:1px;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+  .bar .msg{background:var(--navy);display:flex;align-items:center;padding:0 40px 0 30px;margin-left:-6px;
+    min-width:620px;font:700 26px 'Rajdhani';letter-spacing:1px;
+    clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%)}
+  .msg span{display:inline-block;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .45s}
+  .msg span.out{transform:translateY(-120%);opacity:0}
+  .msg span.in{transform:translateY(120%);opacity:0}
+  .msg em{font-style:normal;color:var(--red)}
+
+  /* ---------- meta (canto superior direito) ---------- */
+  .goal{position:absolute;top:28px;right:28px;width:360px;background:rgba(15,25,35,.85);padding:14px 20px 16px;
+    clip-path:polygon(16px 0,100% 0,100% 100%,0 100%,0 16px);filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
+  .goal .t{font:700 18px 'Rajdhani';letter-spacing:3px;color:#9aa7b1;display:flex;justify-content:space-between}
+  .goal .t b{color:var(--ice)}
+  .goal .track{height:10px;background:#26333f;margin-top:10px;position:relative}
+  .goal .fill{position:absolute;inset:0 auto 0 0;background:var(--red);width:0;transition:width 1s}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="live"><div class="dot"></div>AO VIVO</div>
+    <div class="name"><b>//</b><span id="nome">SEU_NOME</span></div>
+    <div class="clock">NO AR<span id="up">00:00:00</span></div>
+  </div>
+
+  <div class="goal">
+    <div class="t">META DE SEGUIDORES <b id="gtxt">0 / 100</b></div>
+    <div class="track"><div class="fill" id="gfill"></div></div>
+  </div>
+
+  <div class="cam">
+    <div class="frame"></div><div class="corner c1"></div><div class="corner c2"></div>
+    <div class="tag">CAM</div>
+  </div>
+
+  <div class="bar">
+    <div class="label">VALORANT</div>
+    <div class="msg"><span id="msg"></span></div>
+  </div>
+
+<script>
+  // Personalize pela URL: overlay.html?nome=abner&meta=100&atual=12&cam=0
+  const p = new URLSearchParams(location.search);
+  document.getElementById('nome').textContent = (p.get('nome') || 'SEU_NOME').toUpperCase();
+  if (p.get('cam') === '0') document.querySelector('.cam').style.display = 'none';
+  const meta = +p.get('meta') || 100, atual = +p.get('atual') || 0;
+  document.getElementById('gtxt').textContent = atual + ' / ' + meta;
+  document.getElementById('gfill').style.width = Math.min(100, atual / meta * 100) + '%';
+  if (p.get('relogio') === '0') document.querySelector('.clock').style.display = 'none';
+
+  const msgs = [
+    'Segue aí pra não perder a próxima <em>ranqueada</em>',
+    'Manda um <em>presente</em> e escolhe o próximo agente',
+    'Comenta seu <em>elo</em> no chat 👇',
+    'Toca na tela pra deixar <em>curtidas</em> ❤️',
+  ];
+  const el = document.getElementById('msg'); let i = 0;
+  function show(){ el.innerHTML = msgs[i]; el.className = 'in'; requestAnimationFrame(() => requestAnimationFrame(() => el.className = '')); }
+  show();
+  setInterval(() => { el.className = 'out'; setTimeout(() => { i = (i + 1) % msgs.length; show(); }, 450); }, 7000);
+
+  const t0 = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000), z = n => String(n).padStart(2, '0');
+    document.getElementById('up').textContent = z(Math.floor(s / 3600)) + ':' + z(Math.floor(s / 60) % 60) + ':' + z(s % 60);
+  }, 1000);
+</script>
+</body>
+</html>
