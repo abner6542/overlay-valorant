@@ -7,7 +7,7 @@
 <style>
   /* Fundo TRANSPARENTE — use como fonte "Link"/"Navegador" em 1920x1080 */
   :root { --red:#ff4655; --navy:#0f1923; --ice:#ece8e1; --mint:#3de2b4; }
-  html,body{margin:0;width:1920px;height:1080px;background:transparent;overflow:hidden;
+  html,body{margin:0;width:100vw;height:100vh;background:transparent;overflow:hidden;
     font-family:'Rajdhani',sans-serif;color:var(--ice)}
 
   /* ---------- barra superior ---------- */
@@ -54,6 +54,21 @@
   .goal .t b{color:var(--ice)}
   .goal .track{height:10px;background:#26333f;margin-top:10px;position:relative}
   .goal .fill{position:absolute;inset:0 auto 0 0;background:var(--red);width:0;transition:width 1s}
+  .game{display:none}
+
+  /* ---------- 9:16 (1080x1920) — fora das áreas que o app do TikTok cobre ---------- */
+  @media (orientation:portrait){
+    html,body{width:1080px;height:1920px}
+    .top{top:210px;left:40px}
+    .goal{top:300px;left:40px;right:auto;width:420px}
+    .bar{top:440px;left:40px;bottom:auto}
+    .bar .msg{min-width:0;width:690px}
+    .game{display:block;position:absolute;left:0;right:0;top:540px;height:608px}
+    .game::before,.game::after{content:"";position:absolute;left:0;right:0;height:6px;background:var(--red)}
+    .game::before{top:-6px}.game::after{bottom:-6px}
+    .cam{top:1200px;bottom:auto;left:300px;right:auto;width:480px;height:270px}
+    .cam .tag{left:auto;right:-3px;bottom:auto;top:-40px}
+  }
 </style>
 </head>
 <body>
@@ -68,6 +83,8 @@
     <div class="track"><div class="fill" id="gfill"></div></div>
   </div>
 
+  <div class="game"></div>
+
   <div class="cam">
     <div class="frame"></div><div class="corner c1"></div><div class="corner c2"></div>
     <div class="tag">CAM</div>
@@ -81,7 +98,7 @@
 <script>
   // Personalize pela URL: overlay.html?nome=abner&meta=100&atual=12&cam=0
   const p = new URLSearchParams(location.search);
-  document.getElementById('nome').textContent = (p.get('nome') || 'SEU_NOME').toUpperCase();
+  document.getElementById('nome').textContent = (p.get('nome') || '@hztoolkit').toUpperCase();
   if (p.get('cam') === '0') document.querySelector('.cam').style.display = 'none';
   const meta = +p.get('meta') || 100, atual = +p.get('atual') || 0;
   document.getElementById('gtxt').textContent = atual + ' / ' + meta;
